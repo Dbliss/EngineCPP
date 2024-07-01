@@ -1,0 +1,6 @@
+﻿  Chess Engine.cpp
+  engine.cpp
+  Generating Code...
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/PROFILE' specification
+Chess Engine.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:REF' specification
+  Chess Engine.vcxproj -> C:\Users\dbliss-henaghan\source\repos\Chess Engine\x64\Debug\Chess Engine.exe
