@@ -1,3 +1,7 @@
 C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\Chess Engine.obj
 C:\Users\dbliss-henaghan\source\repos\Chess Engine\chess.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\chess.obj
+C:\Users\dbliss-henaghan\source\repos\Chess Engine\BoardDisplay.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\BoardDisplay.obj
+C:\Users\dbliss-henaghan\source\repos\Chess Engine\chess2.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\chess2.obj
 C:\Users\dbliss-henaghan\source\repos\Chess Engine\engine.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\engine.obj
+C:\Users\dbliss-henaghan\source\repos\Chess Engine\engine2.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\engine2.obj
+C:\Users\dbliss-henaghan\source\repos\Chess Engine\zobrist.cpp;C:\Users\dbliss-henaghan\source\repos\Chess Engine\Chess Engine\x64\Release\zobrist.obj
