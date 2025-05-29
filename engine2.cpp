@@ -1,6 +1,9 @@
 #include "engine.h"
 #include <iostream>
 #include <chrono>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include "engine2.h"
 #include <vector>
 #include <algorithm>
@@ -8,7 +11,7 @@
 
 std::chrono::time_point<std::chrono::high_resolution_clock> endTime2;
 
-const int64_t pawn_pcsq[64] = {
+int64_t pawn_pcsq[64] = {
       0,   0,   0,   0,   0,   0,   0,   0,
      15,  20,  30,  40,  40,  30,  20,  15,
      10,  10,  20,  30,  30,  20,  10,  10,
@@ -19,7 +22,7 @@ const int64_t pawn_pcsq[64] = {
       0,   0,   0,   0,   0,   0,   0,   0
 };
 
-const int64_t knight_pcsq[64] = {
+int64_t knight_pcsq[64] = {
     -50, -40, -30, -30, -30, -30, -40, -50,
     -40, -20,   0,   0,   0,   0, -20, -40,
     -30,   0,  10,  15,  15,  10,   0, -30,
@@ -30,7 +33,7 @@ const int64_t knight_pcsq[64] = {
     -50, -40, -30, -30, -30, -30, -40, -50
 };
 
-const int64_t bishop_pcsq[64] = {
+int64_t bishop_pcsq[64] = {
     -10, -10, -10, -10, -10, -10, -10, -10,
     -10,   0,   0,   0,   0,   0,   0, -10,
     -10,   0,   5,   5,   5,   5,   0, -10,
@@ -41,7 +44,7 @@ const int64_t bishop_pcsq[64] = {
     -10, -10, -20, -10, -10, -20, -10, -10
 };
 
-const int64_t king_pcsq[64] = {
+int64_t king_pcsq[64] = {
     -40, -40, -40, -40, -40, -40, -40, -40,
     -40, -40, -40, -40, -40, -40, -40, -40,
     -40, -40, -40, -40, -40, -40, -40, -40,
@@ -52,7 +55,7 @@ const int64_t king_pcsq[64] = {
       0,  20,  40, -20,   0, -20,  40,  20
 };
 
-const int64_t king_pcsq_black[64] = {
+int64_t king_pcsq_black[64] = {
     -40, -40, -40, -40, -40, -40, -40, -40,
     -40, -40, -40, -40, -40, -40, -40, -40,
     -40, -40, -40, -40, -40, -40, -40, -40,
@@ -63,7 +66,7 @@ const int64_t king_pcsq_black[64] = {
      20,  40, -20,   0, -20,  40,  20,   0 
 };
 
-const int64_t king_endgame_pcsq[64] = {
+int64_t king_endgame_pcsq[64] = {
     -40, -30, -20, -10, -10, -20, -30, -40,
     -30, -10,   0,  10,  10,   0, -10, -30,
     -20,   0,  30,  50,  50,  30,   0, -20,
@@ -74,13 +77,41 @@ const int64_t king_endgame_pcsq[64] = {
     -40, -30, -20, -10, -10, -20, -30, -40
 };
 
+bool loadPieceSquareTables(const std::string& file) {
+    std::ifstream in(file);
+    if(!in) return false;
+    std::string data((std::istreambuf_iterator<char>(in)), {});
+    bool ok = true;
+    auto parse = [&](const std::string& key, int64_t* arr) {
+        size_t p = data.find("\"" + key + "\"");
+        if(p == std::string::npos) { ok = false; return; }
+        p = data.find('[', p);
+        size_t e = data.find(']', p);
+        if(p == std::string::npos || e == std::string::npos) { ok = false; return; }
+        std::istringstream ss(data.substr(p+1, e - p - 1));
+        std::string token;
+        for(int i=0;i<64;i++) {
+            if(!std::getline(ss, token, ',')) { ok = false; return; }
+            arr[i] = std::stoll(token);
+        }
+    };
+    parse("pawn_pcsq", pawn_pcsq);
+    parse("knight_pcsq", knight_pcsq);
+    parse("bishop_pcsq", bishop_pcsq);
+    parse("king_pcsq", king_pcsq);
+    parse("king_pcsq_black", king_pcsq_black);
+    parse("king_endgame_pcsq", king_endgame_pcsq);
+    return ok;
+}
 unsigned int ctzll3(unsigned long long x) {
-    unsigned long index; // Variable to store the result
-    // _BitScanForward64 returns 0 if x is zero, so handle this case:
-    if (_BitScanForward64(&index, x))
-        return index;
-    else
-        return 64; // Define behavior for x == 0
+    if (x == 0) return 64;
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward64(&index, x);
+    return index;
+#else
+    return __builtin_ctzll(x);
+#endif
 }
 
 int kingDistance2(uint64_t king1, uint64_t king2) {
@@ -183,7 +214,7 @@ double_t evaluate2(Board& board) {
     double_t gamePhase = ((totalMaterial - currentMaterial)) / totalMaterial;
 
     // Helper function to get the positional value of a bitboard
-    auto getPositionalValueWhite = [](int64_t pieces, const int64_t values[]) {
+    auto getPositionalValueWhite = [](int64_t pieces, int64_t values[]) {
         double_t positionalValue = 0;
         while (pieces) {
             int index = ctzll3(pieces);
@@ -194,7 +225,7 @@ double_t evaluate2(Board& board) {
         };
 
     // Helper function to get the positional value of a bitboard
-    auto getPositionalValueBlack = [](int64_t pieces, const int64_t values[]) {
+    auto getPositionalValueBlack = [](int64_t pieces, int64_t values[]) {
         double_t positionalValue = 0;
         while (pieces) {
             int index = ctzll3(pieces);

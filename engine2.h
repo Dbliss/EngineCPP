@@ -8,3 +8,4 @@ std::tuple<Move, double_t> perft2(Board& board, int depth, std::vector<std::tupl
 std::tuple<Move, double_t> perftHelper2(Board& board, int depth, double_t alpha, double_t beta, int startDepth, std::vector<std::tuple<Move, double_t>>& iterativeDeepeningMoves, int totalExtensions, bool lastIterationNull);
 
 extern std::chrono::time_point<std::chrono::high_resolution_clock> endTime2;
+bool loadPieceSquareTables(const std::string& path);
