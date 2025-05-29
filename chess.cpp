@@ -27,12 +27,14 @@ std::string numToBoardPosition(int num) {
 }
 
 unsigned int ctzll(unsigned long long x) {
-    unsigned long index; // Variable to store the result
-    // _BitScanForward64 returns 0 if x is zero, so handle this case:
-    if (_BitScanForward64(&index, x))
-        return index;
-    else
-        return 64; // Define behavior for x == 0
+    if (x == 0) return 64;
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward64(&index, x);
+    return index;
+#else
+    return __builtin_ctzll(x);
+#endif
 }
 
 /**

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <string>
 
 std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
 
@@ -75,13 +76,19 @@ bool loadPieceSquareTables(const std::string& file) {
     std::ifstream in(file);
     if(!in) return false;
     std::string data((std::istreambuf_iterator<char>(in)), {});
+    bool ok = true;
     auto parse = [&](const std::string& key, int64_t* arr) {
         size_t p = data.find("\"" + key + "\"");
-        if(p == std::string::npos) return;
+        if(p == std::string::npos) { ok = false; return; }
         p = data.find('[', p);
         size_t e = data.find(']', p);
+        if(p == std::string::npos || e == std::string::npos) { ok = false; return; }
         std::istringstream ss(data.substr(p+1, e - p - 1));
-        for(int i=0;i<64;i++) ss >> arr[i];
+        std::string token;
+        for(int i=0;i<64;i++) {
+            if(!std::getline(ss, token, ',')) { ok = false; return; }
+            arr[i] = std::stoll(token);
+        }
     };
     parse("pawn_pcsq", pawn_pcsq);
     parse("knight_pcsq", knight_pcsq);
@@ -89,16 +96,18 @@ bool loadPieceSquareTables(const std::string& file) {
     parse("king_pcsq", king_pcsq);
     parse("king_pcsq_black", king_pcsq_black);
     parse("king_endgame_pcsq", king_endgame_pcsq);
-    return true;
+    return ok;
 }
 
 unsigned int ctzll2(unsigned long long x) {
-    unsigned long index; // Variable to store the result
-    // _BitScanForward64 returns 0 if x is zero, so handle this case:
-    if (_BitScanForward64(&index, x))
-        return index;
-    else
-        return 64; // Define behavior for x == 0
+    if (x == 0) return 64;
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward64(&index, x);
+    return index;
+#else
+    return __builtin_ctzll(x);
+#endif
 }
 
 int kingDistance(uint64_t king1, uint64_t king2) {

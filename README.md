@@ -7,10 +7,19 @@ optimising these tables through self‑play.
 ## Training piece-square tables
 
 The `training/train_pcsq.py` script performs a very basic self-play search over
-positions defined in `Chess Engine.cpp`. It mutates the piece-square tables and
-keeps any mutation that performs better than the current tables.
+positions defined in `Chess Engine.cpp`. Games are played by a helper program
+compiled from `training/selfplay.cpp`, which uses the C++ engine for all move
+generation and evaluation. The training script mutates the piece-square tables
+and keeps any mutation that performs better than the current tables.
 
-Run the training script from the repository root:
+First compile the helper program:
+
+```bash
+g++ -std=c++17 training/selfplay.cpp chess.cpp engine.cpp engine2.cpp \
+    zobrist.cpp -o training/selfplay
+```
+
+Then run the training script from the repository root:
 
 ```bash
 python3 training/train_pcsq.py
